@@ -1,54 +1,96 @@
 # ============================
-# Warning: Python version must be consistant between:
+# Reference Project: https://packaging.python.org/en/latest/guides/writing-pyproject-toml/
+#
+# Install python-dotenv
+#
+# Os pontos de atenção estão comentados próximo das chaves, aqui só coloquei um
+# lembrete.
+#
+# Atenção: As versões do Python devem ser consistentes entre:
 #   - project.requires-python
 #   - tool.ruff.target-version
 #   - tool.pyright.pythonVersion
 #
-# Warning: Package name must be consistant between:
+# Atenção: O nome do pacote principal deve ser consistente entre:
 #   - project.scripts
 #   - tool.ruff.lint.isort.known-first-party
-#   - The folder inside 'src/'
+#   - A pasta dentro de 'src/'
 # ============================
 [project]
-name = "project1"
+name = "dynamics-csv"
 version = "0.0.1"
-description = "project1"
+description = "dynamics-csv"
 readme = "README.md"
 license = "MIT"
 authors = [{ name = "gaaiuss", email = "caio.gui.castro@gmail.com" }]
-requires-python = ">=3.14"
+requires-python = ">=3.13"
 dependencies = [
-    "python-dotenv>=1.1.0",
-    "rich>=15.0.0",
+    "openpyxl>=3.1.5",
+    "python-dotenv>=1.2.1",
+    "selenium>=4.40.0",
+    "types-selenium>=3.141.9",
+    "webdriver-manager>=4.1.1",
 ]
 
 [project.optional-dependencies]
 dev = ["ruff", "pyright", "pytest", "pytest-xdist"]
 
+[project.scripts]
+# Define os comandos de console. A chave ('dynamics-csv') é o comando.
+# O valor aponta para 'nome_do_pacote.nome_do_modulo:nome_da_funcao'.
+# Ex: 'my_package.main:run' -> src/my_package/main.py (e a função run lá dentro).
+# Lembre-se de sincronizar o nome do pacote com 'known-first-party' do Ruff.
+dynamics-csv = "my_package.my_module:run_from_script"
+
 # ============================
-# Linting and auto format (Ruff)
+# Lint e formatação (Ruff)
 # ============================
 [tool.ruff]
 line-length = 88
-target-version = "py314"
+target-version = "py313"
 fix = true
 show-fixes = true
 indent-width = 4
 exclude = ["venv", ".venv", "env", ".env", "node_modules", "__pycache__"]
 
 [tool.ruff.lint]
-select = ["ALL"]
-ignore = [
-    "T201",  # Checks for print statements.
-    "INP001", # Checks for packages that are missing an __init__.py file.
-    "D", # All pydocstyle (D)
-    # Checks that function arguments are annotated with a more specific type 
-    # than Any.
-    "ANN401", 
-    "ERA001", # Checks for commented-out Python code.
-    "A004", # Shadowing Python Builtin.
-    "CPY001", # Missing copyright notice at top of file.
+select = [
+    "ASYNC",
+    "A",
+    "ANN",
+    "B",
+    "BLE",
+    "C4",
+    "C90",
+    "COM",
+    "E",
+    "EM",
+    "ERA",
+    "EXE",
+    "F",
+    "FBT",
+    "FIX",
+    "I",
+    "ICN",
+    "ISC",
+    "Q",
+    "RET",
+    "RSE",
+    "S",
+    "SIM",
+    "SLF",
+    "T10",
+    "T20",
+    "TC",
+    "TD",
+    "TRY",
+    "UP",
+    "W",
+    "YTT",
+    "RUF",
+    "N",
 ]
+ignore = ["T201", "COM812"]
 
 [tool.ruff.lint.per-file-ignores]
 "tests/**/*.py" = ["ANN201", "S101"]
@@ -59,16 +101,17 @@ indent-style = "space"
 line-ending = "lf"
 
 [tool.ruff.lint.isort]
-# Teaches Ruff what is the main package of the project.
-# It must be the same name of the folder inside the 'src/'.
+# Ensina ao Ruff qual é o pacote principal do seu projeto.
+# Deve ser o mesmo nome da pasta dentro de 'src/'.
 known-first-party = ["my_package"]
 
+
 # ============================
-# Typing (Pyright)
+# Tipagem (Pyright)
 # ============================
 [tool.pyright]
 typeCheckingMode = "strict"
-pythonVersion = "3.14"
+pythonVersion = "3.13"
 include = ["src", 'tests']
 exclude = [
     "**/.*",
@@ -77,38 +120,38 @@ exclude = [
     "**/env",
     "**/.env",
     "**/node_modules",
-    "**/__pycache__", 
+    "**/__pycache__",
 ]
 venv = ".venv"
 venvPath = "."
 executionEnvironments = [{ root = "src" }]
 
-# Rules disabled
-# reportMissingTypeStubs = "none" # Missing stubs file
-# reportUnknownMemberType = "none" # Type of parameter partially unknown
+# Ignored warnings
+reportUnknownArgumentType = "none"
 
 # ============================
-# Tests (Pytest)
+# Testes (Pytest)
 # ============================
 [tool.pytest.ini_options]
 addopts = "-s --color=yes --tb=short"
-# Add 'src' to Python path during tests. This allows the tests in `tests/` 
-# to import the modules in `src/` without errors.
+# Adiciona 'src' ao path do Python durante os testes. Isso permite que
+# os testes em `tests/` importem os módulos de `src/` sem erros.
 pythonpath = ["src"]
 testpaths = ["tests"]
 
+
 # ============================
-# Build and Setuptools
+# Build e Setuptools
 # ============================
 [build-system]
 requires = ["setuptools", "wheel"]
 build-backend = "setuptools.build_meta"
 
 [tool.setuptools.packages.find]
-# Informs setuptools to find the packages inside 'src' folder.
-# Essential for layout structure 'src/'.
+# Informa ao setuptools para encontrar os pacotes dentro da pasta 'src'.
+# Essencial para a estrutura de layout com 'src/'.
 where = ["src"]
 
 [tool.setuptools]
-# Maps the root folder to 'src'.
+# Mapeia o diretório raiz de pacotes para 'src'.
 package-dir = { "" = "src" }

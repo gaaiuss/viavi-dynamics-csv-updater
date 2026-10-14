@@ -1,130 +1,66 @@
-### Python Environment
+# Update PNs Equip csv - \*_NOT WORKING DUE TO MS UPDATES!_
 
-This is a setup for a basic Python project.
+This is a script to update a CSV file based on another resource CSV. It uses
+web scraping to log in to Dynamics via Selenium module to capture the table
+values and write them to a new CSV file line by line.
 
----
+## Basic Functionality
 
-### Explaining files
+### Browser Login
 
-`/src`: folder for all the scripts/codes (python files, modules, config files).
+- Gets the user, password, and Dynamics URL from a `.env` file.
 
-`.env-example`: environment variables example file for base .env setup. Rename it to '.env' after changing it.
+- Uses Selenium and the `.env` variables for the login session.
 
-`.gitignore`: git ignored files list, names listed in the file will not be managed by git and consequently will not be posted on GitHub.
+- Captures the HTML elements by id, XPATH and tag to scrap the products data.
 
-`python-version`: Python version used on this repository.
+### Web Scraping
 
-`pyproject.toml`: uv configuration file that lists and configures all the project dependencies (names, versions, linters, folder hierarchy).
+- All the interactions to get the data from the webpage are made via Selenium.
 
----
+- The script uses the basic functions of selenium to achieve the inner table
+  that is located in a iframe inside the page.
 
-### Initial requirements
+- Once it gets there, all the web scraping are made inside this table on a
+  "for" loop, searching for each PN from the `root.csv` file.
 
-1. [Python](https://www.python.org/downloads/)
-2. [Git](https://git-scm.com/downloads)
-3. [VS Code](https://code.visualstudio.com/)
+- If the product is located, the script scraps the specified fields and writes
+  the information on a new file: `output\Updated_PNs_Equipments.csv`. If the product is
+  not found, the loop continues with the next PN number.
 
-On Windows, allow PowerShell to execute scripts (like virtual environments).
+### Error handling
 
-1. Open PowerShell **as admin**
-2. Run this command:
+- Sometimes Selenium does not find an HTML element on the first try, so a new
+  interaction is made if that occurs. This can cause an infinite loop if an
+  element ID is wrong or changed.
 
-```powershell
-Set-ExecutionPolicy RemoteSigned -Scope CurrentUser
+- Not found case: Selenium clicks on the "OK" button popup and simply continues
+  the loop.
+
+- System processing: Sometimes the system pops up a warning message, the script
+  awaits the warning to clear to continue the loop.
+
+- Timeout, click obtrusion: Sometimes a HTML element cannot be found or clicked
+  due to a system delay, the script simply tries the current action again to
+  mitigate the current error involving this problem.
+
+## Setup
+
+- Install the requirements:
+
+```python
+pip install -r requirements.txt
 ```
 
-Reboot if necessary.
+- Change the variables in `.env_example`.
 
----
+- Rename the file to `.env`.
 
-### UV Manager
+- Run the `src\main.py` file:
 
-[uv](https://docs.astral.sh/uv/getting-started/)
-
-```sh
-# UV installation (Windows, Linux, Mac)
-# Windows PowerShell:
-powershell -ExecutionPolicy ByPass -c "irm https://astral.sh/uv/install.ps1 | iex"
-
-# Linux/macOS (curl)
-curl -LsSf https://astral.sh/uv/install.sh | sh
+```python
+python .\src\main.py
 ```
 
-```sh
-# Creates the full project
-directory: uv init project-name
-
-# Initialize an existing project:
-uv init
-```
-
-```sh
-# Installs Python, creates venv and installs dependencies
-uv sync
-```
-
-```sh
-# Install packges
-uv add requests ruff pyright
-
-# Remove packages
-uv remove requests
-```
-
-```sh
-# Runs Python scripts without activating venv
-uv run src/main.py
-
-# Installs tools like ruff or pyright globally
-uv tool install ruff
-uvx ruff
-uv tool uninstall ruff
-```
-
----
-
-### Git Config
-
-```bash
-# Initialize repository
-git init # Don't need to do this if UV already done it.
-
-# Configures Global User
-git config --global user.name "gaaiuss"
-git config --global user.email "caio.gui.castro@gmail.com"
-
-# Standard branches to 'main'
-git config --global init.defaultBranch main
-git branch -m main
-
-# Standard end of line for multiplatform
-git config --global core.autocrlf input
-git config --global core.eol lf
-
-git config --list --global
-
-# First commit
-git add .
-git commit -m "initial"
-
-# Congigure repository
-git remote add origin URL_REPO_SSH
-git push origin main -u
-
-# Future commits
-git add .
-git commit -m "MENSAGEM"
-git push
-```
-
----
-
-### `.env` e `.env-example`
-
-Default pattern for env variables, `python-dotenv` is already added as a project dependency:
-
-```bash
-uv sync
-```
-
-Copy `.env-example` to another file named `.env` to activate the env variables.
+- The script runs in background and saves the current PN that it is searching
+  for, so you can minimize it or screen lock it if you want.
